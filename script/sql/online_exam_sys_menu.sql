@@ -11,7 +11,7 @@
  Target Server Version : 80042 (8.0.42)
  File Encoding         : 65001
 
- Date: 28/09/2025 21:53:03
+ Date: 03/10/2025 16:14:18
 */
 
 SET NAMES utf8mb4;
@@ -182,5 +182,11 @@ INSERT INTO `sys_menu` VALUES (1972209543498375172, '题库分类新增', 197220
 INSERT INTO `sys_menu` VALUES (1972209543498375173, '题库分类修改', 1972209543498375170, 3, '#', '', NULL, 1, 0, 'F', '0', '0', 'edu:questionBankCategory:edit', '#', 103, 1, '2025-09-28 16:00:03', NULL, NULL, '');
 INSERT INTO `sys_menu` VALUES (1972209543498375174, '题库分类删除', 1972209543498375170, 4, '#', '', NULL, 1, 0, 'F', '0', '0', 'edu:questionBankCategory:remove', '#', 103, 1, '2025-09-28 16:00:03', NULL, NULL, '');
 INSERT INTO `sys_menu` VALUES (1972209543498375175, '题库分类导出', 1972209543498375170, 5, '#', '', NULL, 1, 0, 'F', '0', '0', 'edu:questionBankCategory:export', '#', 103, 1, '2025-09-28 16:00:03', NULL, NULL, '');
+INSERT INTO `sys_menu` VALUES (1973928478631473154, '试题', 1972195018522955778, 1, 'question/index/:bankId', 'edu/question/index', NULL, 1, 0, 'C', '1', '0', 'edu:question:list', '#', 103, 1, '2025-10-03 09:50:39', 1, '2025-10-03 15:51:10', '试题菜单');
+INSERT INTO `sys_menu` VALUES (1973928478631473155, '试题查询', 1973928478631473154, 1, '#', '', NULL, 1, 0, 'F', '0', '0', 'edu:question:query', '#', 103, 1, '2025-10-03 09:50:39', NULL, NULL, '');
+INSERT INTO `sys_menu` VALUES (1973928478631473156, '试题新增', 1973928478631473154, 2, '#', '', NULL, 1, 0, 'F', '0', '0', 'edu:question:add', '#', 103, 1, '2025-10-03 09:50:39', NULL, NULL, '');
+INSERT INTO `sys_menu` VALUES (1973928478631473157, '试题修改', 1973928478631473154, 3, '#', '', NULL, 1, 0, 'F', '0', '0', 'edu:question:edit', '#', 103, 1, '2025-10-03 09:50:39', NULL, NULL, '');
+INSERT INTO `sys_menu` VALUES (1973928478631473158, '试题删除', 1973928478631473154, 4, '#', '', NULL, 1, 0, 'F', '0', '0', 'edu:question:remove', '#', 103, 1, '2025-10-03 09:50:39', NULL, NULL, '');
+INSERT INTO `sys_menu` VALUES (1973928478631473159, '试题导出', 1973928478631473154, 5, '#', '', NULL, 1, 0, 'F', '0', '0', 'edu:question:export', '#', 103, 1, '2025-10-03 09:50:39', NULL, NULL, '');
 
 SET FOREIGN_KEY_CHECKS = 1;
