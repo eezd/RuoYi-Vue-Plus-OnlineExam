@@ -6,4 +6,4 @@
 
 ## 注意
 
-请先导入原版SQL `ry_vue_5.X.sql` 最后再导入 `online_exam.sql.sql` 和 `online_exam_sys_menu.sql`
+直接导入 sql 即可, 暂只支持 MySQL 数据库
