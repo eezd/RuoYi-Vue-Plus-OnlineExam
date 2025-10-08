@@ -55,10 +55,22 @@ public class EduExamVo implements Serializable {
     private Long categoryId;
 
     /**
+     * 考试分类名称
+     */
+    @ExcelProperty(value = "考试分类名称")
+    private String categoryName;
+
+    /**
      * 关联题库ID
      */
     @ExcelProperty(value = "关联题库ID")
     private Long bankId;
+
+    /**
+     * 关联题库名称
+     */
+    @ExcelProperty(value = "关联题库名称")
+    private String bankName;
 
     /**
      * 考试时长（分钟）

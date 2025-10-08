@@ -1,5 +1,6 @@
 package org.dromara.edu.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
@@ -9,6 +10,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.edu.domain.EduExamCategory;
+import org.dromara.edu.domain.EduQuestionBank;
+import org.dromara.edu.mapper.EduExamCategoryMapper;
+import org.dromara.edu.mapper.EduQuestionBankMapper;
 import org.springframework.stereotype.Service;
 import org.dromara.edu.domain.bo.EduExamBo;
 import org.dromara.edu.domain.vo.EduExamVo;
@@ -19,6 +24,8 @@ import org.dromara.edu.service.IEduExamService;
 import java.util.List;
 import java.util.Map;
 import java.util.Collection;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 考试信息Service业务层处理
@@ -32,6 +39,10 @@ import java.util.Collection;
 public class EduExamServiceImpl implements IEduExamService {
 
     private final EduExamMapper baseMapper;
+
+    private final EduExamCategoryMapper eduExamCategoryMapper;
+
+    private final EduQuestionBankMapper eduQuestionBankMapper;
 
     /**
      * 查询考试信息
@@ -55,6 +66,50 @@ public class EduExamServiceImpl implements IEduExamService {
     public TableDataInfo<EduExamVo> queryPageList(EduExamBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<EduExam> lqw = buildQueryWrapper(bo);
         Page<EduExamVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+
+        // 获取所有的 categoryId
+        List<Long> categoryIds = result.getRecords().stream()
+            .map(EduExamVo::getCategoryId)
+            .filter(Objects::nonNull)
+            .distinct()
+            .collect(Collectors.toList());
+        // 批量查询分类信息
+        if (CollUtil.isNotEmpty(categoryIds)) {
+            List<EduExamCategory> categories = eduExamCategoryMapper.selectByIds(categoryIds);
+            // 构建 categoryId -> categoryName 的映射
+            Map<Long, String> categoryMap = categories.stream()
+                .collect(Collectors.toMap(
+                    EduExamCategory::getId,
+                    EduExamCategory::getCategoryName
+                ));
+            // 填充 categoryName
+            result.getRecords().forEach(vo -> {
+                if (vo.getCategoryId() != null) {
+                    vo.setCategoryName(categoryMap.get(vo.getCategoryId()));
+                }
+            });
+        }
+
+        // 题库ID和名称关联
+        List<Long> bankIds = result.getRecords().stream()
+            .map(EduExamVo::getBankId)
+            .filter(Objects::nonNull)
+            .distinct()
+            .collect(Collectors.toList());
+        if (CollUtil.isNotEmpty(bankIds)){
+            List<EduQuestionBank> banks = eduQuestionBankMapper.selectByIds(bankIds);
+            Map<Long,String> bankMap = banks.stream()
+                .collect(Collectors.toMap(
+                    EduQuestionBank::getId,
+                    EduQuestionBank::getBankName
+                ));
+            result.getRecords().forEach(vo->{
+                if (vo.getBankId()!=null){
+                    vo.setBankName(bankMap.get(vo.getBankId()));
+                }
+            });
+        }
+
         return TableDataInfo.build(result);
     }
 
