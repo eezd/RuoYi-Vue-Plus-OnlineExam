@@ -11,7 +11,7 @@
  Target Server Version : 80042 (8.0.42)
  File Encoding         : 65001
 
- Date: 05/10/2025 15:05:38
+ Date: 11/10/2025 23:02:40
 */
 
 SET NAMES utf8mb4;
@@ -83,20 +83,48 @@ INSERT INTO `edu_exam_category` VALUES (1974356718604976129, '000000', 197435629
 -- ----------------------------
 DROP TABLE IF EXISTS `edu_exam_class`;
 CREATE TABLE `edu_exam_class`  (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '关联ID',
+  `exam_id` bigint NOT NULL COMMENT '考试ID',
+  `dept_id` bigint NOT NULL COMMENT '部门ID'
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '考试班级关联表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of edu_exam_class
+-- ----------------------------
+INSERT INTO `edu_exam_class` VALUES (1974730480030523393, 1974312656841699330);
+INSERT INTO `edu_exam_class` VALUES (1974730480030523393, 1974312677473480706);
+
+-- ----------------------------
+-- Table structure for edu_exam_result
+-- ----------------------------
+DROP TABLE IF EXISTS `edu_exam_result`;
+CREATE TABLE `edu_exam_result`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '结果ID',
   `tenant_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '租户编号',
   `exam_id` bigint NOT NULL COMMENT '考试ID',
-  `dept_id` bigint NOT NULL COMMENT '部门ID',
+  `student_id` bigint NOT NULL COMMENT '学生ID',
+  `start_time` datetime NOT NULL COMMENT '开始考试时间',
+  `submit_time` datetime NULL DEFAULT NULL COMMENT '交卷时间',
+  `exam_time` int NULL DEFAULT 0 COMMENT '实际考试时长（分钟）',
+  `total_score` decimal(8, 2) NULL DEFAULT 0.00 COMMENT '总分',
+  `user_score` decimal(8, 2) NULL DEFAULT 0.00 COMMENT '得分',
+  `question_count` int NULL DEFAULT 0 COMMENT '题目总数',
+  `correct_count` int NULL DEFAULT 0 COMMENT '正确题目数',
+  `wrong_count` int NULL DEFAULT 0 COMMENT '错误题目数',
+  `answer_snapshot` json NULL COMMENT '答题快照（JSON格式记录所有答题情况）',
+  `is_submit` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '0' COMMENT '是否已交卷（0否 1是）',
+  `client_ip` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '客户端IP',
+  `user_agent` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '浏览器信息',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
   `create_dept` bigint NULL DEFAULT NULL COMMENT '创建部门',
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `create_by` bigint NULL DEFAULT NULL COMMENT '创建人',
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `update_by` bigint NULL DEFAULT NULL COMMENT '更新人',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '考试部门关联表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '考试结果表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Records of edu_exam_class
+-- Records of edu_exam_result
 -- ----------------------------
 
 -- ----------------------------
@@ -566,6 +594,8 @@ INSERT INTO `gen_table` VALUES (1972192031821991938, 'master', 'edu_question_ban
 INSERT INTO `gen_table` VALUES (1973926227707899906, 'master', 'edu_question', '试题表', NULL, NULL, 'EduQuestion', 'crud', 'org.dromara.edu', 'edu', 'question', '试题', 'eezd', '0', '/', '{\"treeCode\":null,\"treeName\":null,\"treeParentCode\":null,\"parentMenuId\":\"1972195018522955778\"}', 103, 1, '2025-10-03 09:41:01', 1, '2025-10-03 14:32:42', NULL);
 INSERT INTO `gen_table` VALUES (1974352410014609409, 'master', 'edu_exam_category', '考试分类表', '', '', 'EduExamCategory', 'tree', 'org.dromara.edu', 'edu', 'examCategory', '考试分类', 'eezd', '0', '/', '{\"treeCode\":\"id\",\"treeName\":\"category_name\",\"treeParentCode\":\"parent_id\",\"parentMenuId\":\"1972195018522955778\"}', 103, 1, '2025-10-04 13:54:31', 1, '2025-10-04 14:03:16', NULL);
 INSERT INTO `gen_table` VALUES (1974366170154467330, 'master', 'edu_exam', '考试表', NULL, NULL, 'EduExam', 'crud', 'org.dromara.edu', 'edu', 'exam', '考试信息', 'eezd', '0', '/', '{\"treeCode\":null,\"treeName\":null,\"treeParentCode\":null,\"parentMenuId\":\"1972195018522955778\"}', 103, 1, '2025-10-04 14:49:12', 1, '2025-10-05 10:30:48', NULL);
+INSERT INTO `gen_table` VALUES (1975766708121210881, 'master', 'edu_exam_class', '考试班级关联表', NULL, NULL, 'EduExamClass', 'crud', 'org.dromara.edu', 'edu', 'examClass', '考试班级关联', 'eezd', '0', '/', '{\"treeCode\":null,\"treeName\":null,\"treeParentCode\":null,\"parentMenuId\":\"1972195018522955778\"}', 103, 1, '2025-10-08 11:34:26', 1, '2025-10-08 11:40:51', NULL);
+INSERT INTO `gen_table` VALUES (1976204139035291650, 'master', 'edu_exam_result', '考试结果表', NULL, NULL, 'EduExamResult', 'crud', 'org.dromara.edu', 'edu', 'examResult', '考试结果', 'eezd', '0', '/', '{\"treeCode\":null,\"treeName\":null,\"treeParentCode\":null,\"parentMenuId\":\"1972195018522955778\"}', 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43', NULL);
 
 -- ----------------------------
 -- Table structure for gen_table_column
@@ -673,6 +703,30 @@ INSERT INTO `gen_table_column` VALUES (1974366170414514192, 1974366170154467330,
 INSERT INTO `gen_table_column` VALUES (1974366170414514193, 1974366170154467330, 'create_by', '创建人', 'bigint', 'Long', 'createBy', '0', '0', '0', NULL, NULL, NULL, NULL, 'EQ', 'input', '', 16, 103, 1, '2025-10-04 14:49:12', 1, '2025-10-05 10:30:48');
 INSERT INTO `gen_table_column` VALUES (1974366170414514194, 1974366170154467330, 'update_time', '更新时间', 'datetime', 'Date', 'updateTime', '0', '0', '0', NULL, NULL, NULL, NULL, 'EQ', 'datetime', '', 17, 103, 1, '2025-10-04 14:49:12', 1, '2025-10-05 10:30:48');
 INSERT INTO `gen_table_column` VALUES (1974366170414514195, 1974366170154467330, 'update_by', '更新人', 'bigint', 'Long', 'updateBy', '0', '0', '0', NULL, NULL, NULL, NULL, 'EQ', 'input', '', 18, 103, 1, '2025-10-04 14:49:12', 1, '2025-10-05 10:30:48');
+INSERT INTO `gen_table_column` VALUES (1975766708460949507, 1975766708121210881, 'exam_id', '考试ID', 'bigint', 'Long', 'examId', '0', '0', '1', '1', '1', '1', '1', 'EQ', 'input', '', 1, 103, 1, '2025-10-08 11:34:26', 1, '2025-10-08 11:40:51');
+INSERT INTO `gen_table_column` VALUES (1975766708523864066, 1975766708121210881, 'dept_id', '部门ID', 'bigint', 'Long', 'deptId', '0', '0', '1', '1', '1', '1', '1', 'EQ', 'input', '', 2, 103, 1, '2025-10-08 11:34:26', 1, '2025-10-08 11:40:51');
+INSERT INTO `gen_table_column` VALUES (1976204139333087233, 1976204139035291650, 'id', '结果ID', 'bigint', 'Long', 'id', '1', '1', '1', NULL, '1', '1', NULL, 'EQ', 'input', '', 1, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
+INSERT INTO `gen_table_column` VALUES (1976204139333087234, 1976204139035291650, 'tenant_id', '租户编号', 'varchar(20)', 'String', 'tenantId', '0', '0', '1', NULL, NULL, NULL, NULL, 'EQ', 'input', '', 2, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
+INSERT INTO `gen_table_column` VALUES (1976204139333087235, 1976204139035291650, 'exam_id', '考试ID', 'bigint', 'Long', 'examId', '0', '0', '1', '1', '1', '1', '1', 'EQ', 'input', '', 3, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
+INSERT INTO `gen_table_column` VALUES (1976204139333087236, 1976204139035291650, 'student_id', '学生ID', 'bigint', 'Long', 'studentId', '0', '0', '1', '1', '1', '1', '1', 'EQ', 'input', '', 4, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
+INSERT INTO `gen_table_column` VALUES (1976204139333087237, 1976204139035291650, 'start_time', '开始考试时间', 'datetime', 'Date', 'startTime', '0', '0', '1', '1', '1', '1', '1', 'EQ', 'datetime', '', 5, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
+INSERT INTO `gen_table_column` VALUES (1976204139333087238, 1976204139035291650, 'submit_time', '交卷时间', 'datetime', 'Date', 'submitTime', '0', '0', '0', '1', '1', '1', '1', 'EQ', 'datetime', '', 6, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
+INSERT INTO `gen_table_column` VALUES (1976204139333087239, 1976204139035291650, 'exam_time', '实际考试时长（分钟）', 'int', 'Long', 'examTime', '0', '0', '0', '1', '1', '1', '1', 'EQ', 'input', '', 7, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
+INSERT INTO `gen_table_column` VALUES (1976204139400196097, 1976204139035291650, 'total_score', '总分', 'decimal(8,2)', 'Long', 'totalScore', '0', '0', '0', '1', '1', '1', '1', 'EQ', 'input', '', 8, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
+INSERT INTO `gen_table_column` VALUES (1976204139400196098, 1976204139035291650, 'user_score', '得分', 'decimal(8,2)', 'Long', 'userScore', '0', '0', '0', '1', '1', '1', '1', 'EQ', 'input', '', 9, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
+INSERT INTO `gen_table_column` VALUES (1976204139400196099, 1976204139035291650, 'question_count', '题目总数', 'int', 'Long', 'questionCount', '0', '0', '0', '1', '1', '1', '1', 'EQ', 'input', '', 10, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
+INSERT INTO `gen_table_column` VALUES (1976204139400196100, 1976204139035291650, 'correct_count', '正确题目数', 'int', 'Long', 'correctCount', '0', '0', '0', '1', '1', '1', '1', 'EQ', 'input', '', 11, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
+INSERT INTO `gen_table_column` VALUES (1976204139400196101, 1976204139035291650, 'wrong_count', '错误题目数', 'int', 'Long', 'wrongCount', '0', '0', '0', '1', '1', '1', '1', 'EQ', 'input', '', 12, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
+INSERT INTO `gen_table_column` VALUES (1976204139400196102, 1976204139035291650, 'answer_snapshot', '答题快照（JSON格式记录所有答题情况）', 'json', 'String', 'answerSnapshot', '0', '0', '0', '1', '1', '1', '1', 'EQ', NULL, '', 13, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
+INSERT INTO `gen_table_column` VALUES (1976204139400196103, 1976204139035291650, 'is_submit', '是否已交卷（0否 1是）', 'char(1)', 'String', 'isSubmit', '0', '0', '0', '1', '1', '1', '1', 'EQ', 'input', 'edu_exam_result_submit', 14, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
+INSERT INTO `gen_table_column` VALUES (1976204139400196104, 1976204139035291650, 'client_ip', '客户端IP', 'varchar(50)', 'String', 'clientIp', '0', '0', '0', '1', '1', '1', '1', 'EQ', 'input', '', 15, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
+INSERT INTO `gen_table_column` VALUES (1976204139400196105, 1976204139035291650, 'user_agent', '浏览器信息', 'varchar(500)', 'String', 'userAgent', '0', '0', '0', '1', '1', '1', '1', 'EQ', 'textarea', '', 16, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
+INSERT INTO `gen_table_column` VALUES (1976204139400196106, 1976204139035291650, 'remark', '备注', 'varchar(500)', 'String', 'remark', '0', '0', '0', '1', '1', '1', NULL, 'EQ', 'textarea', '', 17, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
+INSERT INTO `gen_table_column` VALUES (1976204139400196107, 1976204139035291650, 'create_dept', '创建部门', 'bigint', 'Long', 'createDept', '0', '0', '0', NULL, NULL, NULL, NULL, 'EQ', 'input', '', 18, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
+INSERT INTO `gen_table_column` VALUES (1976204139400196108, 1976204139035291650, 'create_time', '创建时间', 'datetime', 'Date', 'createTime', '0', '0', '0', NULL, NULL, NULL, NULL, 'EQ', 'datetime', '', 19, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
+INSERT INTO `gen_table_column` VALUES (1976204139400196109, 1976204139035291650, 'create_by', '创建人', 'bigint', 'Long', 'createBy', '0', '0', '0', NULL, NULL, NULL, NULL, 'EQ', 'input', '', 20, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
+INSERT INTO `gen_table_column` VALUES (1976204139400196110, 1976204139035291650, 'update_time', '更新时间', 'datetime', 'Date', 'updateTime', '0', '0', '0', NULL, NULL, NULL, NULL, 'EQ', 'datetime', '', 21, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
+INSERT INTO `gen_table_column` VALUES (1976204139400196111, 1976204139035291650, 'update_by', '更新人', 'bigint', 'Long', 'updateBy', '0', '0', '0', NULL, NULL, NULL, NULL, 'EQ', 'input', '', 22, 103, 1, '2025-10-09 16:32:38', 1, '2025-10-09 16:43:43');
 
 -- ----------------------------
 -- Table structure for sj_distributed_lock
@@ -1584,6 +1638,8 @@ INSERT INTO `sys_dict_data` VALUES (1974367219170869250, '000000', 0, '不随机
 INSERT INTO `sys_dict_data` VALUES (1974367246555480066, '000000', 1, '随机出题', '1', 'edu_exam_is_random', '', 'primary', 'N', 103, 1, '2025-10-04 14:53:28', 1, '2025-10-04 14:53:28', '');
 INSERT INTO `sys_dict_data` VALUES (1974367791093579778, '000000', 0, '不允许查看答案', '0', 'edu_exam_allow_review', '', 'primary', 'N', 103, 1, '2025-10-04 14:55:38', 1, '2025-10-04 14:55:38', '');
 INSERT INTO `sys_dict_data` VALUES (1974367815785447426, '000000', 1, '允许查看答案', '1', 'edu_exam_allow_review', '', 'primary', 'N', 103, 1, '2025-10-04 14:55:44', 1, '2025-10-04 14:55:44', '');
+INSERT INTO `sys_dict_data` VALUES (1976206547492728834, '000000', 0, '未交卷', '0', 'edu_exam_result_submit', '', 'primary', 'N', 103, 1, '2025-10-09 16:42:12', 1, '2025-10-09 16:42:12', '');
+INSERT INTO `sys_dict_data` VALUES (1976206576760582145, '000000', 1, '已交卷', '1', 'edu_exam_result_submit', '', 'primary', 'N', 103, 1, '2025-10-09 16:42:19', 1, '2025-10-09 16:42:19', '');
 
 -- ----------------------------
 -- Table structure for sys_dict_type
@@ -1645,6 +1701,7 @@ INSERT INTO `sys_dict_type` VALUES (1974352885459939329, '000000', '考试分类
 INSERT INTO `sys_dict_type` VALUES (1974366445133037569, '000000', '考试状态', 'edu_exam_status', 103, 1, '2025-10-04 14:50:17', 1, '2025-10-04 14:50:17', '');
 INSERT INTO `sys_dict_type` VALUES (1974367146009624578, '000000', '考试是否随机出题', 'edu_exam_is_random', 103, 1, '2025-10-04 14:53:04', 1, '2025-10-04 14:56:04', '');
 INSERT INTO `sys_dict_type` VALUES (1974367739142930434, '000000', '考试是否允许查看答案', 'edu_exam_allow_review', 103, 1, '2025-10-04 14:55:26', 1, '2025-10-04 14:55:26', '');
+INSERT INTO `sys_dict_type` VALUES (1976206327560204289, '000000', '考试交卷状态', 'edu_exam_result_submit', 103, 1, '2025-10-09 16:41:19', 1, '2025-10-09 16:41:53', '');
 
 -- ----------------------------
 -- Table structure for sys_logininfor
@@ -1671,6 +1728,7 @@ CREATE TABLE `sys_logininfor`  (
 -- ----------------------------
 -- Records of sys_logininfor
 -- ----------------------------
+INSERT INTO `sys_logininfor` VALUES (1975749748931125249, '000000', 'admin', 'pc', 'pc', '0:0:0:0:0:0:0:1', '内网IP', 'Chrome', 'Windows 10 or Windows Server 2016', '0', '登录成功', '2025-10-08 10:27:02');
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -2525,7 +2583,7 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES (1, '000000', 103, 'admin', '疯狂的狮子Li', 'sys_user', 'crazyLionLi@163.com', '15888888888', '1', NULL, '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '0:0:0:0:0:0:0:1', '2025-10-05 10:05:50', 103, 1, '2025-09-28 14:31:55', -1, '2025-10-05 10:05:50', '管理员');
+INSERT INTO `sys_user` VALUES (1, '000000', 103, 'admin', '疯狂的狮子Li', 'sys_user', 'crazyLionLi@163.com', '15888888888', '1', NULL, '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '0:0:0:0:0:0:0:1', '2025-10-08 10:27:02', 103, 1, '2025-09-28 14:31:55', -1, '2025-10-08 10:27:02', '管理员');
 INSERT INTO `sys_user` VALUES (3, '000000', 108, 'test', '本部门及以下 密码666666', 'sys_user', '', '', '0', NULL, '$2a$10$b8yUzN0C71sbz.PhNOCgJe.Tu1yWC3RNrTyjSQ8p1W0.aaUXUJ.Ne', '0', '1', '127.0.0.1', '2025-09-28 14:31:55', 103, 1, '2025-09-28 14:31:55', 1, '2025-10-04 10:54:01', NULL);
 INSERT INTO `sys_user` VALUES (4, '000000', 102, 'test1', '仅本人 密码666666', 'sys_user', '', '', '0', NULL, '$2a$10$b8yUzN0C71sbz.PhNOCgJe.Tu1yWC3RNrTyjSQ8p1W0.aaUXUJ.Ne', '0', '1', '127.0.0.1', '2025-09-28 14:31:55', 103, 1, '2025-09-28 14:31:55', 1, '2025-10-04 10:53:58', NULL);
 INSERT INTO `sys_user` VALUES (1974314859711131649, '000000', 1974312589770584066, '21admin', '21级管理员', 'sys_user', '', '', '0', NULL, '$2a$10$k6e2Nso2MiHUJaGxBquukePc8ERrZFE/TL6F3kWYcs3fN1Q0Ya9y2', '0', '0', '0:0:0:0:0:0:0:1', '2025-10-04 11:28:16', 103, 1, '2025-10-04 11:25:18', 1974314859711131649, '2025-10-04 11:28:26', '');

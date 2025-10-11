@@ -135,6 +135,7 @@ tenant:
     - sys_client
     - sys_oss_config
     - flow_spel
+    - edu_exam_class
 
 # MyBatisPlus配置
 # https://baomidou.com/config/
