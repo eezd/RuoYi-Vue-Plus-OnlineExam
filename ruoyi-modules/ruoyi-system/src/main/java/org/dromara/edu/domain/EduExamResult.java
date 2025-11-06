@@ -1,13 +1,13 @@
 package org.dromara.edu.domain;
 
-import org.dromara.common.tenant.core.TenantEntity;
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import org.dromara.common.tenant.core.TenantEntity;
 
 import java.io.Serial;
+import java.util.Date;
 
 /**
  * 考试结果对象 edu_exam_result
@@ -50,7 +50,7 @@ public class EduExamResult extends TenantEntity {
     private Date submitTime;
 
     /**
-     * 实际考试时长（分钟）
+     * 考试时长（分钟）
      */
     private Long examTime;
 

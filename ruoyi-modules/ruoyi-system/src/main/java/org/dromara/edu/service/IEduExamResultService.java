@@ -1,9 +1,12 @@
 package org.dromara.edu.service;
 
-import org.dromara.edu.domain.vo.EduExamResultVo;
-import org.dromara.edu.domain.bo.EduExamResultBo;
-import org.dromara.common.mybatis.core.page.TableDataInfo;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.dromara.common.mybatis.core.page.PageQuery;
+import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.edu.domain.EduExamResult;
+import org.dromara.edu.domain.bo.EduExamResultBo;
+import org.dromara.edu.domain.vo.EduExamResultSubmitVo;
+import org.dromara.edu.domain.vo.EduExamResultVo;
 
 import java.util.Collection;
 import java.util.List;
@@ -65,4 +68,21 @@ public interface IEduExamResultService {
      * @return 是否删除成功
      */
     Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
+
+    /**
+     * WEB端开始考试
+     *
+     * @param examId 考试ID
+     * @param ua     浏览器UA信息
+     * @return
+     */
+    EduExamResult startExam(Long examId, String ua) throws JsonProcessingException;
+
+    /**
+     * WEB端提交考试
+     *
+     * @param eduExamResultSubmitVo
+     * @return
+     */
+    Boolean resultSubmit(EduExamResultSubmitVo eduExamResultSubmitVo);
 }

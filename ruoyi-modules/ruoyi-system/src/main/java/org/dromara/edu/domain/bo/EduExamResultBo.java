@@ -1,15 +1,15 @@
 package org.dromara.edu.domain.bo;
 
-import org.dromara.edu.domain.EduExamResult;
-import org.dromara.common.mybatis.core.domain.BaseEntity;
-import org.dromara.common.core.validate.AddGroup;
-import org.dromara.common.core.validate.EditGroup;
 import io.github.linpeilie.annotations.AutoMapper;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import jakarta.validation.constraints.*;
+import org.dromara.common.core.validate.AddGroup;
+import org.dromara.common.core.validate.EditGroup;
+import org.dromara.common.mybatis.core.domain.BaseEntity;
+import org.dromara.edu.domain.EduExamResult;
+
 import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
  * 考试结果业务对象 edu_exam_result
@@ -25,25 +25,25 @@ public class EduExamResultBo extends BaseEntity {
     /**
      * 结果ID
      */
-    @NotNull(message = "结果ID不能为空", groups = { EditGroup.class })
+    @NotNull(message = "结果ID不能为空", groups = {EditGroup.class})
     private Long id;
 
     /**
      * 考试ID
      */
-    @NotNull(message = "考试ID不能为空", groups = { AddGroup.class, EditGroup.class })
+    @NotNull(message = "考试ID不能为空", groups = {AddGroup.class, EditGroup.class})
     private Long examId;
 
     /**
      * 学生ID
      */
-    @NotNull(message = "学生ID不能为空", groups = { AddGroup.class, EditGroup.class })
+    @NotNull(message = "学生ID不能为空", groups = {AddGroup.class, EditGroup.class})
     private Long studentId;
 
     /**
      * 开始考试时间
      */
-    @NotNull(message = "开始考试时间不能为空", groups = { AddGroup.class, EditGroup.class })
+    @NotNull(message = "开始考试时间不能为空", groups = {AddGroup.class, EditGroup.class})
     private Date startTime;
 
     /**
@@ -52,7 +52,7 @@ public class EduExamResultBo extends BaseEntity {
     private Date submitTime;
 
     /**
-     * 实际考试时长（分钟）
+     * 考试时长（分钟）
      */
     private Long examTime;
 
