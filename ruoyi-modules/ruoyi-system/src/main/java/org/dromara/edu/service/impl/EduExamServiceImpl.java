@@ -1,29 +1,32 @@
 package org.dromara.edu.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import org.dromara.common.core.utils.MapstructUtils;
-import org.dromara.common.core.utils.StringUtils;
-import org.dromara.common.mybatis.core.page.TableDataInfo;
-import org.dromara.common.mybatis.core.page.PageQuery;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.common.core.utils.MapstructUtils;
+import org.dromara.common.core.utils.StringUtils;
+import org.dromara.common.mybatis.core.page.PageQuery;
+import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.satoken.utils.LoginHelper;
+import org.dromara.edu.domain.EduExam;
 import org.dromara.edu.domain.EduExamCategory;
+import org.dromara.edu.domain.EduExamClass;
 import org.dromara.edu.domain.EduQuestionBank;
-import org.dromara.edu.mapper.EduExamCategoryMapper;
-import org.dromara.edu.mapper.EduQuestionBankMapper;
-import org.springframework.stereotype.Service;
 import org.dromara.edu.domain.bo.EduExamBo;
 import org.dromara.edu.domain.vo.EduExamVo;
-import org.dromara.edu.domain.EduExam;
+import org.dromara.edu.mapper.EduExamCategoryMapper;
+import org.dromara.edu.mapper.EduExamClassMapper;
 import org.dromara.edu.mapper.EduExamMapper;
+import org.dromara.edu.mapper.EduQuestionBankMapper;
 import org.dromara.edu.service.IEduExamService;
+import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -40,6 +43,8 @@ public class EduExamServiceImpl implements IEduExamService {
 
     private final EduExamMapper baseMapper;
 
+    private final EduExamClassMapper eduExamClassMapper;
+
     private final EduExamCategoryMapper eduExamCategoryMapper;
 
     private final EduQuestionBankMapper eduQuestionBankMapper;
@@ -51,7 +56,7 @@ public class EduExamServiceImpl implements IEduExamService {
      * @return 考试信息
      */
     @Override
-    public EduExamVo queryById(Long id){
+    public EduExamVo queryById(Long id) {
         return baseMapper.selectVoById(id);
     }
 
@@ -64,7 +69,31 @@ public class EduExamServiceImpl implements IEduExamService {
      */
     @Override
     public TableDataInfo<EduExamVo> queryPageList(EduExamBo bo, PageQuery pageQuery) {
+        // List<RoleDTO> roles = LoginHelper.getLoginUser().getRoles();
+        // boolean isStudent = CollUtil.isNotEmpty(roles) && roles.stream()
+        //     .anyMatch(role -> role.getRoleKey() != null && role.getRoleKey().contains("student"));
+        // if (isStudent) {
+        //     // 当前用户具有 student 角色
+        // }
+        Long deptId = LoginHelper.getDeptId();
+        List<EduExamClass> eduExamClasses = eduExamClassMapper.selectList(
+            new LambdaQueryWrapper<>(EduExamClass.class)
+                .eq(EduExamClass::getDeptId, deptId)
+        );
+        List<Long> examIds = eduExamClasses.stream()
+            .map(EduExamClass::getExamId)
+            .filter(Objects::nonNull)
+            .distinct() // 去重，避免重复 ID
+            .collect(Collectors.toList());
+        // 获取考试列表
         LambdaQueryWrapper<EduExam> lqw = buildQueryWrapper(bo);
+        if (CollUtil.isNotEmpty(examIds)) {
+            lqw.in(EduExam::getId, examIds);
+        } else {
+            // 如果没有任何考试ID，返回空结果
+            return TableDataInfo.build();
+        }
+
         Page<EduExamVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
 
         // 获取所有的 categoryId
@@ -73,6 +102,7 @@ public class EduExamServiceImpl implements IEduExamService {
             .filter(Objects::nonNull)
             .distinct()
             .collect(Collectors.toList());
+
         // 批量查询分类信息
         if (CollUtil.isNotEmpty(categoryIds)) {
             List<EduExamCategory> categories = eduExamCategoryMapper.selectByIds(categoryIds);
@@ -96,15 +126,15 @@ public class EduExamServiceImpl implements IEduExamService {
             .filter(Objects::nonNull)
             .distinct()
             .collect(Collectors.toList());
-        if (CollUtil.isNotEmpty(bankIds)){
+        if (CollUtil.isNotEmpty(bankIds)) {
             List<EduQuestionBank> banks = eduQuestionBankMapper.selectByIds(bankIds);
-            Map<Long,String> bankMap = banks.stream()
+            Map<Long, String> bankMap = banks.stream()
                 .collect(Collectors.toMap(
                     EduQuestionBank::getId,
                     EduQuestionBank::getBankName
                 ));
-            result.getRecords().forEach(vo->{
-                if (vo.getBankId()!=null){
+            result.getRecords().forEach(vo -> {
+                if (vo.getBankId() != null) {
                     vo.setBankName(bankMap.get(vo.getBankId()));
                 }
             });
@@ -175,8 +205,8 @@ public class EduExamServiceImpl implements IEduExamService {
     /**
      * 保存前的数据校验
      */
-    private void validEntityBeforeSave(EduExam entity){
-        //TODO 做一些数据校验,如唯一约束
+    private void validEntityBeforeSave(EduExam entity) {
+        // TODO 做一些数据校验,如唯一约束
     }
 
     /**
@@ -188,8 +218,8 @@ public class EduExamServiceImpl implements IEduExamService {
      */
     @Override
     public Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid) {
-        if(isValid){
-            //TODO 做一些业务上的校验,判断是否需要校验
+        if (isValid) {
+            // TODO 做一些业务上的校验,判断是否需要校验
         }
         return baseMapper.deleteByIds(ids) > 0;
     }

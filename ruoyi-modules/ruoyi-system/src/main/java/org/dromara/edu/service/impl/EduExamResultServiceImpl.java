@@ -180,9 +180,6 @@ public class EduExamResultServiceImpl implements IEduExamResultService {
                 .eq(EduExamResult::getExamId, examId)
                 .eq(EduExamResult::getIsSubmit, EduConstant.EXAM_IS_SUBMIT)
         );
-        if (isSubmit != null) {
-            throw new IllegalArgumentException("您已经提交过该考试");
-        }
 
         EduExamResult eduExamResult = baseMapper.selectOne(
             Wrappers.lambdaQuery(EduExamResult.class)
@@ -231,7 +228,13 @@ public class EduExamResultServiceImpl implements IEduExamResultService {
             eduExamResult.setIsSubmit(EduConstant.EXAM_IS_NOT_SUBMIT);
             eduExamResult.setClientIp(ServletUtils.getClientIP());
             eduExamResult.setUserAgent(ua);
-            baseMapper.insert(eduExamResult);
+
+            if (isSubmit != null) {
+                eduExamResult.setIsSubmit(EduConstant.EXAM_IS_SUBMIT);
+                // throw new IllegalArgumentException("您已经提交过该考试");
+            } else {
+                baseMapper.insert(eduExamResult);
+            }
         } else {
             // 校验是否为当前用户
             if (!Objects.equals(eduExamResult.getStudentId(), LoginHelper.getUserId())) {
