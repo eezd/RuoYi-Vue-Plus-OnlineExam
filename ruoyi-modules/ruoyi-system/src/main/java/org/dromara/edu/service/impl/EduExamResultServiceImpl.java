@@ -1,5 +1,7 @@
 package org.dromara.edu.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -20,16 +22,23 @@ import org.dromara.edu.domain.EduExam;
 import org.dromara.edu.domain.EduExamResult;
 import org.dromara.edu.domain.EduQuestion;
 import org.dromara.edu.domain.bo.EduExamResultBo;
+import org.dromara.edu.domain.bo.EdutStudentExamResultBo;
 import org.dromara.edu.domain.vo.EduExamQuestionVo;
 import org.dromara.edu.domain.vo.EduExamResultSubmitVo;
 import org.dromara.edu.domain.vo.EduExamResultVo;
+import org.dromara.edu.domain.vo.EduStudentExamResultVo;
 import org.dromara.edu.mapper.EduExamMapper;
 import org.dromara.edu.mapper.EduExamResultMapper;
 import org.dromara.edu.mapper.EduQuestionMapper;
 import org.dromara.edu.service.IEduExamResultService;
+import org.dromara.system.domain.SysDept;
+import org.dromara.system.domain.SysUser;
+import org.dromara.system.mapper.SysDeptMapper;
+import org.dromara.system.mapper.SysUserMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -48,6 +57,10 @@ public class EduExamResultServiceImpl implements IEduExamResultService {
     private final EduExamMapper eduExamMapper;
 
     private final EduQuestionMapper eduQuestionMapper;
+
+    private final SysUserMapper sysUserMapper;
+
+    private final SysDeptMapper sysDeptMapper;
 
     /**
      * 查询考试结果
@@ -68,11 +81,177 @@ public class EduExamResultServiceImpl implements IEduExamResultService {
      * @return 考试结果分页列表
      */
     @Override
-    public TableDataInfo<EduExamResultVo> queryPageList(EduExamResultBo bo, PageQuery pageQuery) {
-        LambdaQueryWrapper<EduExamResult> lqw = buildQueryWrapper(bo);
-        Page<EduExamResultVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
-        return TableDataInfo.build(result);
+    public TableDataInfo<EduStudentExamResultVo> queryPageList(EdutStudentExamResultBo bo, PageQuery pageQuery) {
+        Page<EduExamResult> page = pageQuery.build();
+        LambdaQueryWrapper<EduExamResult> lqw = new LambdaQueryWrapper<>();
+
+        // 构建查询语句-考试名称
+        if (StringUtils.isNotBlank(bo.getExamName())) {
+            List<Long> examIds = eduExamMapper.selectList(
+                new LambdaQueryWrapper<EduExam>()
+                    .like(EduExam::getExamName, bo.getExamName())
+                    .select(EduExam::getId)
+            ).stream().map(EduExam::getId).toList();
+
+            if (CollUtil.isNotEmpty(examIds)) {
+                lqw.in(EduExamResult::getExamId, examIds);
+            } else {
+                // 没有匹配考试名称，直接返回空分页
+                return TableDataInfo.build(new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize()));
+            }
+        }
+
+        // 构建查询语句-用户名称
+        if (StringUtils.isNotBlank(bo.getStudentName())) {
+            List<Long> userIds = sysUserMapper.selectList(
+                new LambdaQueryWrapper<SysUser>()
+                    .like(SysUser::getNickName, bo.getStudentName())
+                    .select(SysUser::getUserId)
+            ).stream().map(SysUser::getUserId).toList();
+
+            if (CollUtil.isNotEmpty(userIds)) {
+                lqw.in(EduExamResult::getStudentId, userIds);
+            } else {
+                // 没有匹配学生，直接返回空结果
+                return TableDataInfo.build(new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize()));
+            }
+        }
+
+        // 构建查询语句-部门名称
+        if (StringUtils.isNotBlank(bo.getDeptName())) {
+            // 模糊匹配部门名称
+            List<Long> deptIds = sysDeptMapper.selectList(
+                new LambdaQueryWrapper<SysDept>()
+                    .like(SysDept::getDeptName, bo.getDeptName())
+                    .select(SysDept::getDeptId)
+            ).stream().map(SysDept::getDeptId).toList();
+
+            if (CollUtil.isNotEmpty(deptIds)) {
+                List<Long> userIds = sysUserMapper.selectList(
+                    new LambdaQueryWrapper<SysUser>()
+                        .in(SysUser::getDeptId, deptIds)
+                        .select(SysUser::getUserId)
+                ).stream().map(SysUser::getUserId).toList();
+
+                if (CollUtil.isNotEmpty(userIds)) {
+                    lqw.in(EduExamResult::getStudentId, userIds);
+                } else {
+                    return TableDataInfo.build(new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize()));
+                }
+            }
+        }
+        // 最后查询符合条件的考试结果数据
+        Page<EduExamResult> resultPage = baseMapper.selectPage(page, lqw);
+
+        // 转换为 EduExamResultVo 列表
+        List<EduExamResultVo> voRecords = resultPage.getRecords().stream()
+            .map(item -> BeanUtil.copyProperties(item, EduExamResultVo.class))
+            .toList();
+
+        // 构建新的分页对象，复用原分页信息
+        Page<EduExamResultVo> result = new Page<>(
+            resultPage.getCurrent(),
+            resultPage.getSize(),
+            resultPage.getTotal()
+        );
+        result.setRecords(voRecords);
+
+        List<EduExamResultVo> records = result.getRecords();
+        if (CollUtil.isEmpty(records)) {
+            // 返回空分页对象
+            return TableDataInfo.build(new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize()));
+        }
+
+        // 提取所有 studentId
+        List<Long> studentIds = records.stream()
+            .map(EduExamResultVo::getStudentId)
+            .filter(Objects::nonNull)
+            .distinct()
+            .toList();
+
+        if (CollUtil.isEmpty(studentIds)) {
+            // 无学生ID，直接转换类型返回
+            List<EduStudentExamResultVo> voList = records.stream()
+                .map(r -> BeanUtil.copyProperties(r, EduStudentExamResultVo.class))
+                .toList();
+            Page<EduStudentExamResultVo> voPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
+            voPage.setRecords(voList);
+            return TableDataInfo.build(voPage);
+        }
+
+        // 查询学生信息（SysUser）
+        List<SysUser> users = sysUserMapper.selectList(
+            new LambdaQueryWrapper<SysUser>().in(SysUser::getUserId, studentIds)
+        );
+        Map<Long, SysUser> userMap = users.stream()
+            .collect(Collectors.toMap(SysUser::getUserId, Function.identity()));
+
+        // 查询部门信息（SysDept）
+        List<Long> deptIds = users.stream()
+            .map(SysUser::getDeptId)
+            .filter(Objects::nonNull)
+            .distinct()
+            .toList();
+
+        Map<Long, SysDept> deptMap = new HashMap<>();
+        if (CollUtil.isNotEmpty(deptIds)) {
+            List<SysDept> depts = sysDeptMapper.selectList(
+                new LambdaQueryWrapper<SysDept>().in(SysDept::getDeptId, deptIds)
+            );
+            deptMap = depts.stream()
+                .collect(Collectors.toMap(SysDept::getDeptId, Function.identity()));
+        }
+
+        // 转换并补全信息
+        Map<Long, SysDept> finalDeptMap = deptMap;
+
+        // 额外：批量查询考试信息（假设表为 edu_exam）
+        List<Long> examIds = records.stream()
+            .map(EduExamResultVo::getExamId)
+            .filter(Objects::nonNull)
+            .distinct()
+            .toList();
+
+        Map<Long, String> examNameMap = new HashMap<>();
+        if (CollUtil.isNotEmpty(examIds)) {
+            List<EduExam> exams = eduExamMapper.selectList(
+                new LambdaQueryWrapper<EduExam>().in(EduExam::getId, examIds)
+            );
+            examNameMap = exams.stream()
+                .collect(Collectors.toMap(EduExam::getId, EduExam::getExamName));
+        }
+
+        Map<Long, String> finalExamNameMap = examNameMap;
+
+        List<EduStudentExamResultVo> voList = records.stream().map(r -> {
+            EduStudentExamResultVo vo = BeanUtil.copyProperties(r, EduStudentExamResultVo.class);
+
+            // 学生信息
+            SysUser user = userMap.get(r.getStudentId());
+            if (user != null) {
+                vo.setStudentName(user.getNickName());
+                vo.setNickName(user.getNickName());
+                vo.setDeptId(user.getDeptId());
+
+                SysDept dept = finalDeptMap.get(user.getDeptId());
+                if (dept != null) {
+                    vo.setDeptName(dept.getDeptName());
+                }
+            }
+
+            // 考试名称补全
+            vo.setExamName(finalExamNameMap.get(r.getExamId()));
+
+            return vo;
+        }).toList();
+
+        // 重新组装分页结果
+        Page<EduStudentExamResultVo> voPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
+        voPage.setRecords(voList);
+
+        return TableDataInfo.build(voPage);
     }
+
 
     /**
      * 查询符合条件的考试结果列表

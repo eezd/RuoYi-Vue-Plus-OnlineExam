@@ -1,26 +1,29 @@
 package org.dromara.edu.controller;
 
-import java.util.List;
-
-import lombok.RequiredArgsConstructor;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.constraints.*;
 import cn.dev33.satoken.annotation.SaCheckPermission;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.validation.annotation.Validated;
-import org.dromara.common.idempotent.annotation.RepeatSubmit;
-import org.dromara.common.log.annotation.Log;
-import org.dromara.common.web.core.BaseController;
-import org.dromara.common.mybatis.core.page.PageQuery;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import org.dromara.common.core.domain.R;
 import org.dromara.common.core.validate.AddGroup;
 import org.dromara.common.core.validate.EditGroup;
-import org.dromara.common.log.enums.BusinessType;
 import org.dromara.common.excel.utils.ExcelUtil;
-import org.dromara.edu.domain.vo.EduExamResultVo;
-import org.dromara.edu.domain.bo.EduExamResultBo;
-import org.dromara.edu.service.IEduExamResultService;
+import org.dromara.common.idempotent.annotation.RepeatSubmit;
+import org.dromara.common.log.annotation.Log;
+import org.dromara.common.log.enums.BusinessType;
+import org.dromara.common.mybatis.core.page.PageQuery;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.web.core.BaseController;
+import org.dromara.edu.domain.bo.EduExamResultBo;
+import org.dromara.edu.domain.bo.EdutStudentExamResultBo;
+import org.dromara.edu.domain.vo.EduExamResultVo;
+import org.dromara.edu.domain.vo.EduStudentExamResultVo;
+import org.dromara.edu.service.IEduExamResultService;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 考试结果
@@ -41,7 +44,7 @@ public class EduExamResultController extends BaseController {
      */
     @SaCheckPermission("edu:examResult:list")
     @GetMapping("/list")
-    public TableDataInfo<EduExamResultVo> list(EduExamResultBo bo, PageQuery pageQuery) {
+    public TableDataInfo<EduStudentExamResultVo> list(EdutStudentExamResultBo bo, PageQuery pageQuery) {
         return eduExamResultService.queryPageList(bo, pageQuery);
     }
 
@@ -64,7 +67,7 @@ public class EduExamResultController extends BaseController {
     @SaCheckPermission("edu:examResult:query")
     @GetMapping("/{id}")
     public R<EduExamResultVo> getInfo(@NotNull(message = "主键不能为空")
-                                     @PathVariable Long id) {
+                                      @PathVariable Long id) {
         return R.ok(eduExamResultService.queryById(id));
     }
 

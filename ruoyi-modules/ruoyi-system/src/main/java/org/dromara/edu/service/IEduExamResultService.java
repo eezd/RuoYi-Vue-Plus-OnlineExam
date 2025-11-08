@@ -5,8 +5,10 @@ import org.dromara.common.mybatis.core.page.PageQuery;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
 import org.dromara.edu.domain.EduExamResult;
 import org.dromara.edu.domain.bo.EduExamResultBo;
+import org.dromara.edu.domain.bo.EdutStudentExamResultBo;
 import org.dromara.edu.domain.vo.EduExamResultSubmitVo;
 import org.dromara.edu.domain.vo.EduExamResultVo;
+import org.dromara.edu.domain.vo.EduStudentExamResultVo;
 
 import java.util.Collection;
 import java.util.List;
@@ -34,7 +36,7 @@ public interface IEduExamResultService {
      * @param pageQuery 分页参数
      * @return 考试结果分页列表
      */
-    TableDataInfo<EduExamResultVo> queryPageList(EduExamResultBo bo, PageQuery pageQuery);
+    TableDataInfo<EduStudentExamResultVo> queryPageList(EdutStudentExamResultBo bo, PageQuery pageQuery);
 
     /**
      * 查询符合条件的考试结果列表
